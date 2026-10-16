@@ -33,4 +33,6 @@ public abstract class DoorState {
   public abstract void lock();
 
   public abstract void unlock();
+
+  public abstract void unlockShortly();
 }

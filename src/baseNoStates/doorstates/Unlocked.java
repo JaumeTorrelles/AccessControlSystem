@@ -45,4 +45,9 @@ public class Unlocked extends DoorState {
   public void unlock() {
     System.out.println("Door " + door.getId() + " already unlocked");
   }
+
+  @Override
+  public void unlockShortly() {
+    System.out.println("Door " + door.getId() + " already unlocked");
+  }
 }
