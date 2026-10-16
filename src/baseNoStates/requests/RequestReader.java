@@ -1,12 +1,13 @@
 package baseNoStates.requests;
 
-import baseNoStates.DirectoryDoors;
+//import baseNoStates.DirectoryDoors;
 import baseNoStates.DirectoryUsers;
 import baseNoStates.Door;
 import baseNoStates.User;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 
+import baseNoStates.areas.DirectoryAreas;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -78,7 +79,7 @@ public class RequestReader implements Request {
   // if authorized, perform the action.
   public void process() {
     User user = DirectoryUsers.findUserByCredential(credential);
-    Door door = DirectoryDoors.findDoorById(doorId);
+    Door door = DirectoryAreas.findDoorById(doorId);
     assert door != null : "door " + doorId + " not found";
     authorize(user, door);
     // this sets the boolean authorize attribute of the request
@@ -95,9 +96,13 @@ public class RequestReader implements Request {
       authorized = false;
       addReason("user doesn't exists");
     } else {
-      //TODO: get the who, where, when and what in order to decide, and if not
-      // authorized add the reason(s)
-      authorized = true;
+      if (!user.canBeInSpace(door.getFromSpace())) {
+        addReason("user can not stay in space " + door.getFromSpace().getId());
+      }
+      if (!user.canBeInSpace(door.getToSpace())) {
+        addReason("user can not stay in space " + door.getToSpace().getId());
+      }
+      authorized = reasons.isEmpty();
     }
   }
 }

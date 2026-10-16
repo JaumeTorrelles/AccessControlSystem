@@ -1,5 +1,6 @@
 package baseNoStates;
 
+import baseNoStates.areas.Space;
 import baseNoStates.doorstates.DoorState;
 import baseNoStates.doorstates.Unlocked;
 import baseNoStates.requests.RequestReader;
@@ -12,11 +13,25 @@ public class Door {
   // the logical state of the door (unlocked, locked, ...), not to be
   // confused with the physical state closed, see DoorState
   private DoorState state;
+  private final Space fromSpace;
+  private final Space toSpace;
 
-  public Door(String id) {
+  public Door(String id, Space fromSpace, Space toSpace) {
     this.id = id;
+    this.fromSpace = fromSpace;
+    this.toSpace = toSpace;
     this.closed = true;
     this.state = new Unlocked(this);
+
+    toSpace.addDoor(this);
+  }
+
+  public Space getFromSpace() {
+    return fromSpace;
+  }
+
+  public Space getToSpace() {
+    return toSpace;
   }
 
   public void processRequest(RequestReader request) {
