@@ -1,0 +1,63 @@
+@startuml
+skinparam classAttributeIconSize 0
+
+package java{
+    package baseNoStates{
+        package groups{
+            class UserGroup {
+                - name : String
+                - users : ArrayList<User>
+                - actions : ArrayList<String>
+                - areas : ArrayList<Area>
+                - schedule : Schedule
+                + UserGroup(name : String, schedule : Schedule)
+                + addAction(action : String)
+                + addArea(area : Area)
+                + addUser(user : User)
+                + findUser(credential : String) : User
+                + canDoAction(action : String) : boolean
+                + canSendRequests(now : LocalDateTime) : boolean
+                + canBeInSpace(space : Space) : boolean
+            }
+
+            class Schedule {
+                - startDate : LocalDate
+                - endDate : LocalDate
+                - daysOfWeek : ArrayList<DayOfWeek>
+                - startTime : LocalTime
+                - endTime : LocalTime
+                + Schedule(startDate : LocalDate, endDate : LocalDate, daysOfWeek : ArrayList, startTime : LocalTime, endTime : LocalTime)
+                + isDateTimeValid(now : LocalDateTime) : boolean
+            }
+
+            class DirectoryUserGroups {
+                - {static} userGroups : UserGroup[]
+                + {static} makeUserGroups()
+                + {static} findUserByCredential(credential : String) : User
+            }
+        }
+        package areas{
+            abstract class Area {
+                + getSpaces() : ArrayList<Space>
+                + getDoorsGivingAccess() : ArrayList<Door>
+            }
+        }
+        class User {
+            - name : String
+            - credential : String
+            - userGroup : UserGroup
+            + setUserGroup(group : UserGroup)
+            + canBeInSpace(space : Space) : boolean
+            + canSendRequests(now : LocalDateTime) : boolean
+            + canDoAction(action : String) : boolean
+        }
+    }
+}
+
+UserGroup o-- "*" User : users
+UserGroup --> "1" Schedule : schedule
+UserGroup --> "*" Area : areas
+DirectoryUserGroups o-- "1..*" UserGroup : userGroups
+User --> "1" UserGroup : userGroup
+
+@enduml

@@ -1,0 +1,78 @@
+@startuml
+skinparam classAttributeIconSize 0
+
+package java{
+    package baseNoStates{
+        package doorstates{
+
+            abstract class DoorState {
+                - name : String
+                # door : Door
+                + DoorState(door : Door)
+                + getStateName() : String
+                + {abstract} open()
+                + {abstract} close()
+                + {abstract} lock()
+                + {abstract} unlock()
+                + {abstract} unlockShortly()
+            }
+
+            class Unlocked {
+            }
+
+            class Locked {
+            }
+
+            class UnlockedShortly {
+                - {static} CLOCK : Clock
+                - startTime : LocalDateTime
+                + update(observable : Observable, arg : Object)
+            }
+
+            class Propped {
+            }
+
+            class States {
+                + {static} LOCKED : String
+                + {static} UNLOCKED : String
+                + {static} UNLOCKED_SHORTLY : String
+                + {static} PROPPED : String
+            }
+        }
+        class Door {
+            - id : String
+            - closed : boolean
+            - state : DoorState
+            + setState(newState : DoorState)
+            + getStateName() : String
+            - doAction(action : String)
+        }
+
+        class Clock {
+            + Clock(period : int)
+            + start()
+            + stop()
+        }
+    }
+    class Observable {
+        + addObserver(observer : Observer)
+        + deleteObserver(observer : Observer)
+        + notifyObservers()
+    }
+
+    class Observer {
+        + update(observable : Observable, arg : Object)
+    }
+}
+
+DoorState <|-- Unlocked
+DoorState <|-- Locked
+DoorState <|-- UnlockedShortly
+DoorState <|-- Propped
+DoorState --> "1" Door : door
+Door --> "1" DoorState : state
+UnlockedShortly ..|> Observer
+UnlockedShortly --> Clock : CLOCK
+Clock --|> Observable
+
+@enduml

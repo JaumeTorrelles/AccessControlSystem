@@ -1,0 +1,211 @@
+@startuml
+skinparam classAttributeIconSize 0
+
+package java{
+    package baseNoStates{
+        class Main {
+            + {static} main(args : String)
+        }
+
+        class Webserver {
+            - {static} PORT : int
+            - {static} FORMATTER : DateTimeFormatter
+            + Webserver()
+        }
+
+        class SocketThread {
+            - insocked : Socked
+            - makeRequest(tokens : String[]) : Request
+            - makeRequestReader(tokens : String[]) : RequestReader
+            - makeRequestArea(tokens : String[]) : RequestArea
+            - makeHeaderAnswer() : String
+            - makeJsonAnswer(request : Request) : String
+            + run()
+        }
+
+        class Door {
+            - id : String
+            - closed : boolean
+            - state : DoorState
+            - fromSpace : Space
+            - toSpace : Space
+            + Door(id : String, fromSpace : Space, toSpace : Space)
+            + processRequest(request : RequestReader)
+            + setState(newState : DoorState)
+            + setClosed(b : boolean)
+            + isClosed() : boolean
+            + getId() : String
+            + getFromSpace() : Space
+            + getToSpace() : Space
+            + getStateName() : String
+            + toJson() : JSONObject
+            - doAction(action : String)
+        }
+
+        class User {
+            - name : String
+            - credential : String
+            - userGroup : UserGroup
+            + setUserGroup(group : UserGroup)
+            + canBeInSpace(space : Space) : boolean
+            + canSendRequests(now : LocalDateTime) : boolean
+            + canDoAction(action : String) : boolean
+            + getCredential() : String
+            + toString() : String
+        }
+
+        class Clock {
+            - timer : Timer
+            - period : int
+            + Clock(period : int)
+            + start()
+            + stop()
+        }
+
+        package areas{
+            abstract class Area {
+                + {abstract} getDoorsGivingAccess() : ArrayList<Door>
+                + {abstract} getSpaces() : ArrayList<Space>
+                + {abstract} findAreaById(id : String) : Area
+            }
+
+            class Partition {
+                - id : String
+                - childAreas : ArrayList<Area>
+                + Partition(id : String)
+                + addChildArea(child : Area)
+                + getDoorsGivingAccess() : ArrayList<Door>
+                + getSpaces() : ArrayList<Space>
+                + findAreaById(id : String) : Area
+            }
+
+            class Space {
+                - id : String
+                - doors : ArrayList<Door>
+                + Space(id : String)
+                + addDoor(door : Door)
+                + getId() : String
+                + getDoorsGivingAccess() : ArrayList<Door>
+                + getSpaces() : ArrayList<Space>
+                + findAreaById(id : String) : Area
+            }
+
+            class DirectoryAreas {
+                - {static} rootArea : Area
+                - {static} allDoors : Door[]
+                + {static} makeAreas()
+                + {static} findAreaById(id : String) : Area
+                + {static} findDoorById(id : String) : Door
+                + {static} getAllDoors() : Door[]
+            }
+        }
+
+        package groups{
+            class UserGroup {
+                - name : String
+                - users : ArrayList<User>
+                - actions : ArrayList<String>
+                - areas : ArrayList<Area>
+                - schedule : Schedule
+                + UserGroup(name : String, schedule : Schedule)
+                + addAction(action : String)
+                + addArea(area : Area)
+                + addUser(user : User)
+                + findUser(credential : String) : User
+                + canDoAction(action : String) : boolean
+                + canSendRequests(now : LocalDateTime) : boolean
+                + canBeInSpace(space : Space) : boolean
+            }
+
+            class Schedule {
+                - startDate : LocalDate
+                - endDate : LocalDate
+                - daysOfWeek : ArrayList<DayOfWeek>
+                - startTime : LocalTime
+                - endTime : LocalTime
+                + Schedule(startDate : LocalDate, endDate : LocalDate, daysOfWeek : ArrayList, startTime : LocalTime, endTime : LocalTime)
+                + isDateTimeValid(now : LocalDateTime) : boolean
+            }
+
+            class DirectoryUserGroups {
+                - {static} userGroups : UserGroup[]
+                + {static} makeUserGroups()
+                + {static} findUserByCredential(credential : String) : User
+            }
+        }
+
+        package doorstates{
+            abstract class DoorState {
+                - name : String
+                # door : Door
+                + DoorState(door : Door)
+                + getStateName() : String
+                + {abstract} open()
+                + {abstract} close()
+                + {abstract} lock()
+                + {abstract} unlock()
+                + {abstract} unlockShortly()
+            }
+
+            class Unlocked {
+            }
+
+            class Locked {
+            }
+
+            class UnlockedShortly {
+                - {static} CLOCK : Clock
+                - startTime : LocalDateTime
+                + update(observable : Observable, arg : Object)
+            }
+
+            class Propped {
+            }
+
+            class States {
+                + {static} LOCKED : String
+                + {static} UNLOCKED : String
+                + {static} UNLOCKED_SHORTLY : String
+                + {static} PROPPED : String
+            }
+        }
+    }
+    class Observable {
+        + addObserver(observer : Observer)
+        + deleteObserver(observer : Observer)
+        + notifyObservers()
+    }
+
+    class Observer {
+        + update(observable : Observable, arg : Object)
+    }
+}
+
+Main ..> DirectoryAreas
+Main ..> DirectoryUserGroups
+Main --> Webserver
+Webserver +-right- SocketThread
+DirectoryAreas --> "1" Area : rootArea
+DirectoryAreas --> "*" Door : allDoors
+Area <|-- Partition
+Area <|-- Space
+Partition --> "*" Area : childAreas
+Space --> "*" Door : doors
+UserGroup o-- "*" User : users
+UserGroup --> "1" Schedule : schedule
+UserGroup --> "*" Area : areas
+DirectoryUserGroups o-- "1..*" UserGroup : userGroups
+User --> "1" UserGroup : userGroup
+Door --> "1" DoorState : state
+Door --> "1" Space : fromSpace
+Door --> "1" Space : toSpace
+DoorState --> "1" Door : door
+DoorState <|-- Unlocked
+DoorState <|-- Locked
+DoorState <|-- UnlockedShortly
+DoorState <|-- Propped
+UnlockedShortly ..|> Observer
+UnlockedShortly --> Clock : CLOCK
+Clock --|> Observable
+
+@enduml
