@@ -1,37 +1,39 @@
 package baseNoStates;
 
-import baseNoStates.areas.Area;
+
 import baseNoStates.areas.Space;
+import baseNoStates.groups.UserGroup;
 
-import java.util.ArrayList;
+import java.time.LocalDateTime;
 
+// A person recognized by a credential. It holds no permissions itself:
+// it just delegates the can... questions to the group it belongs to.
 public class User {
   private final String name;
   private final String credential;
-  private final ArrayList<Area> associatedAreas = new ArrayList<>();
-
-  public boolean canBeInSpace (Space space) {
-    for (Area area : associatedAreas) {
-      for(Space areaSpace : area.getSpaces()){
-        if(areaSpace.equals(space)){
-          return true;
-        }
-      }
-    }
-    return false;
-  }
-
-  public void addArea(Area area){
-    associatedAreas.add(area);
-  }
+  private UserGroup userGroup = null;
 
   public User(String name, String credential) {
     this.name = name;
     this.credential = credential;
   }
 
+  public void setUserGroup(UserGroup group) {
+    this.userGroup = group;
+  }
+
   public String getCredential() {
     return credential;
+  }
+
+  public boolean canBeInSpace(Space space) {
+    return userGroup.canBeInSpace(space);
+  }
+  public boolean canSendRequests(LocalDateTime now) {
+    return userGroup.canSendRequests(now);
+  }
+  public boolean canDoAction(String action) {
+    return userGroup.canDoAction(action);
   }
 
   @Override

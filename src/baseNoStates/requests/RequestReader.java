@@ -1,13 +1,12 @@
 package baseNoStates.requests;
 
-//import baseNoStates.DirectoryDoors;
-import baseNoStates.DirectoryUsers;
 import baseNoStates.Door;
 import baseNoStates.User;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 import baseNoStates.areas.DirectoryAreas;
+import baseNoStates.groups.DirectoryUserGroups;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -78,7 +77,7 @@ public class RequestReader implements Request {
   // see if the request is authorized and put this into the request, then send it to the door.
   // if authorized, perform the action.
   public void process() {
-    User user = DirectoryUsers.findUserByCredential(credential);
+    User user = DirectoryUserGroups.findUserByCredential(credential);
     Door door = DirectoryAreas.findDoorById(doorId);
     assert door != null : "door " + doorId + " not found";
     authorize(user, door);
@@ -93,14 +92,19 @@ public class RequestReader implements Request {
   // only for testing
   private void authorize(User user, Door door) {
     if (user == null) {
-      authorized = false;
       addReason("user doesn't exists");
     } else {
+      if (!user.canSendRequests(now)) {
+        addReason("outside schedule");
+      }
       if (!user.canBeInSpace(door.getFromSpace())) {
         addReason("user can not stay in space " + door.getFromSpace().getId());
       }
       if (!user.canBeInSpace(door.getToSpace())) {
         addReason("user can not stay in space " + door.getToSpace().getId());
+      }
+      if (!user.canDoAction(action)) {
+        addReason("not allowed action " + action);
       }
       authorized = reasons.isEmpty();
     }

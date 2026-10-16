@@ -4,11 +4,12 @@ package baseNoStates;
 // https://se-education.org/guides/tutorials/intellijUsefulSettings.html
 
 import baseNoStates.areas.DirectoryAreas;
+import baseNoStates.groups.DirectoryUserGroups;
 
 public class Main {
   public static void main(String[] args) {
     DirectoryAreas.makeAreas();
-    DirectoryUsers.makeUsers();
+    DirectoryUserGroups.makeUserGroups();
     new WebServer();
   }
 }
