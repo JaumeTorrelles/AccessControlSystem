@@ -7,10 +7,24 @@ import org.json.JSONObject;
 public class Door {
   private final String id;
   private boolean closed; // physically
+  private DoorState state;
 
   public Door(String id) {
     this.id = id;
     closed = true;
+    this.state = new Unlocked(this);
+  }
+
+  public void setState(DoorState state){
+
+    this.state = state;
+
+  }
+
+  public void setClosed(boolean closed){
+
+    this.closed = closed;
+
   }
 
   public void processRequest(RequestReader request) {
@@ -28,25 +42,17 @@ public class Door {
   private void doAction(String action) {
     switch (action) {
       case Actions.OPEN:
-        if (closed) {
-          closed = false;
-        } else {
-          System.out.println("Can't open door " + id + " because it's already open");
-        }
+        state.open();
         break;
       case Actions.CLOSE:
-        if (closed) {
-          System.out.println("Can't close door " + id + " because it's already closed");
-        } else {
-          closed = true;
-        }
+        state.close();
         break;
       case Actions.LOCK:
-        // TODO
-        // fall through
+        state.lock();
+        break;
       case Actions.UNLOCK:
-        // TODO
-        // fall through
+        state.unlock();
+        break;
       case Actions.UNLOCK_SHORTLY:
         // TODO
         System.out.println("Action " + action + " not implemented yet");
@@ -66,7 +72,9 @@ public class Door {
   }
 
   public String getStateName() {
-    return "unlocked";
+
+    return state.getName();
+
   }
 
   @Override
