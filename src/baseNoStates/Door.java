@@ -8,11 +8,24 @@ public class Door {
   private final String id;
   private boolean closed; // physically
   private DoorState state;
+  private Space fromSpace;
+  private Space toSpace;
 
-  public Door(String id) {
+  public Door(String id, Space from, Space to) {
     this.id = id;
     closed = true;
     this.state = new Unlocked(this);
+    this.fromSpace = from;
+    this.toSpace = to;
+    to.addDoor(this);
+  }
+
+  public Space getFromSpace(){
+    return fromSpace;
+  }
+
+  public Space getToSpace(){
+    return toSpace;
   }
 
   public void setState(DoorState state){
@@ -91,6 +104,8 @@ public class Door {
     json.put("id", id);
     json.put("state", getStateName());
     json.put("closed", closed);
+    json.put("originSpace",getFromSpace().getId() );
+    json.put("destinationSpace",getToSpace().getId());
     return json;
   }
 }

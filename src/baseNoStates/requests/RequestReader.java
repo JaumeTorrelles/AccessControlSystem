@@ -1,9 +1,7 @@
 package baseNoStates.requests;
 
-import baseNoStates.DirectoryDoors;
-import baseNoStates.DirectoryUsers;
-import baseNoStates.Door;
-import baseNoStates.User;
+import baseNoStates.*;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 
@@ -78,7 +76,7 @@ public class RequestReader implements Request {
   // if authorized, perform the action.
   public void process() {
     User user = DirectoryUsers.findUserByCredential(credential);
-    Door door = DirectoryDoors.findDoorById(doorId);
+    Door door = DirectoryAreas.findDoorById(doorId);
     assert door != null : "door " + doorId + " not found";
     authorize(user, door);
     // this sets the boolean authorize attribute of the request
@@ -97,8 +95,20 @@ public class RequestReader implements Request {
     } else {
       //TODO: get the who, where, when and what in order to decide, and if not
       // authorized add the reason(s)
-      authorized = true;
+      userName = user.getName();
+      Space fromSpace = door.getFromSpace();
+      Space toSpace = door.getToSpace();
+      boolean from = user.canBeInSpace(fromSpace);
+      boolean to = user.canBeInSpace(toSpace);
+      if(!from){
+        addReason("Not allowed origin " + fromSpace.getId());
+      }
+      if(!to){
+        addReason("Not allowed destination " + toSpace.getId());
+      }
+      authorized = from && to;
+      }
     }
-  }
 }
+
 
