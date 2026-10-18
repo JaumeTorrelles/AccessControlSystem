@@ -1,40 +1,32 @@
 package baseNoStates;
 
-import java.util.ArrayList;
+import java.time.LocalDateTime;
 
 public class User {
   private final String name;
   private final String credential;
-  private ArrayList<Area> areas;
+  private final UserGroup userGroup;
 
-  public User(String name, String credential) {
+  public User(String name, String credential,UserGroup userGroup) {
     this.name = name;
     this.credential = credential;
-    areas = new ArrayList<Area>();
-  }
-
-  public void addArea(Area area){
-    areas.add(area);
+    this.userGroup = userGroup;
   }
 
   public String getName() {
     return name;
   }
 
-  private ArrayList<Space> getSpaces(){
-    ArrayList<Space> spaces = new ArrayList<>();
-    for (Area child : areas){
-      spaces.addAll(child.getSpaces());
-    }
-    return spaces;
+  public boolean canBeInSpace(Space space){
+    return userGroup.canBeInSpace(space);
   }
 
-  public boolean canBeInSpace(Space space){
-    if(getSpaces().contains(space)){
-      return true;
-    }else{
-      return false;
-    }
+  public boolean canSendRequests(LocalDateTime now){
+    return userGroup.canSendRequests(now);
+  }
+
+  public boolean canDoAction(String action){
+    return userGroup.canDoAction(action);
   }
 
   public String getCredential() {
