@@ -30,4 +30,9 @@ public class Locked extends DoorState{
     this.door.setState(new Unlocked(door));
   }
 
+  @Override
+  public void unlockShortly() {
+    door.setState(new UnlockedShortly(door));
+  }
+
 }

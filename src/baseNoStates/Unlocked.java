@@ -40,4 +40,9 @@ public class Unlocked extends DoorState{
   public void unlock(){
     System.out.println("Can't unlock "+  door.getId()  +" door because it's already unlocked");
   }
+
+  @Override
+  public void unlockShortly() {
+    System.out.println("Can't unlockShortly "+  door.getId()  +" door because it's already unlocked");
+  }
 }
